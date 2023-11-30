@@ -53,6 +53,9 @@ public class Stabby_v1 extends OpMode {
     private double movespeed = 21;
     private double turnspeed = .75;
     private DcMotor intake = null;
+    private Servo Rslideshift;
+    private Servo Lslideshift;
+
     private double precisemovespeed=0.5;
 
     @Override
@@ -67,6 +70,9 @@ public class Stabby_v1 extends OpMode {
         leftBack = hardwareMap.get(DcMotor.class, "lb");
         rightBack = hardwareMap.get(DcMotor.class, "rb");
         intake  = hardwareMap.get(DcMotor.class, "intake");
+        Lslideshift=hardwareMap.get(Servo.class, "Lshift");
+        Rslideshift=hardwareMap.get(Servo.class, "Rshift");
+
 
 
 
@@ -153,6 +159,16 @@ public class Stabby_v1 extends OpMode {
         }
         if (gamepad1.dpad_up){
             intakeoff();
+        }
+        if (gamepad1.dpad_left){
+            Lslideshift.setPosition(0);
+            Rslideshift.setPosition(0);
+
+        }
+        if (gamepad1.dpad_right){
+            Lslideshift.setPosition(1);
+            Rslideshift.setPosition(1);
+
         }
     }
 
