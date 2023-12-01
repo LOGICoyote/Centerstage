@@ -52,9 +52,12 @@ public class Stabby_v1 extends OpMode {
     private DcMotor rightBack = null;
     private double movespeed = 21;
     private double turnspeed = .75;
-    private DcMotor intake = null;
+    private DcMotor intake;
     private Servo Rslideshift;
     private Servo Lslideshift;
+    private DcMotor Llift;
+    private DcMotor Rlift;
+    private double slideoutconstant = 0.8;
 
     private double precisemovespeed=0.5;
 
@@ -66,13 +69,14 @@ public class Stabby_v1 extends OpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         leftFront = hardwareMap.get(DcMotor.class, "lf");
-        rightFront = hardwareMap.get(DcMotor.class, "rf");
         leftBack = hardwareMap.get(DcMotor.class, "lb");
         rightBack = hardwareMap.get(DcMotor.class, "rb");
+        rightFront= hardwareMap.get(DcMotor.class, "rf");
         intake  = hardwareMap.get(DcMotor.class, "intake");
         Lslideshift=hardwareMap.get(Servo.class, "Lshift");
         Rslideshift=hardwareMap.get(Servo.class, "Rshift");
-
+        Llift = hardwareMap.get(DcMotor.class, "llift");
+        Rlift = hardwareMap.get(DcMotor.class, "rlift");
 
 
 
@@ -117,38 +121,38 @@ public class Stabby_v1 extends OpMode {
         left_trigger = gamepad1.left_trigger;
         right_trigger = gamepad1.right_trigger;
 
-        if (left_trigger > 0) {
-            turnleft(left_trigger);
-
-        } else if (right_trigger > 0) {
-            turnright(right_trigger);
-
-        } else if (right_XAxis > 0.2) {
-            straferight(right_XAxis * precisemovespeed);
-
-        } else if (right_XAxis < -0.2) {
-            strafeleft(right_XAxis * -precisemovespeed);
-
-        } else if (right_YAxis > 0.2) {
-            goforward(right_YAxis * precisemovespeed);
-
-        } else if (right_YAxis < -0.2) {
-            gobackward(right_YAxis * precisemovespeed);
-
-        } else if (left_XAxis > 0.4) {
-            straferight(left_XAxis);
-
-        } else if (left_XAxis < -0.4) {
-            strafeleft(-left_XAxis);
-
-        } else if (left_YAxis > 0.2) {
-            goforward(left_YAxis);
-
-        } else if (left_YAxis < -0.2) {
-            gobackward(left_YAxis);
-
-        } else
-            gostop(0);
+//        if (left_trigger > 0) {
+//            turnleft(left_trigger);
+//
+//        } else if (right_trigger > 0) {
+//            turnright(right_trigger);
+//
+//        } else if (right_XAxis > 0.2) {
+//            straferight(right_XAxis * precisemovespeed);
+//
+//        } else if (right_XAxis < -0.2) {
+//            strafeleft(right_XAxis * -precisemovespeed);
+//
+//        } else if (right_YAxis > 0.2) {
+//            goforward(right_YAxis * precisemovespeed);
+//
+//        } else if (right_YAxis < -0.2) {
+//            gobackward(right_YAxis * precisemovespeed);
+//
+//        } else if (left_XAxis > 0.4) {
+//            straferight(left_XAxis);
+//
+//        } else if (left_XAxis < -0.4) {
+//            strafeleft(-left_XAxis);
+//
+//        } else if (left_YAxis > 0.2) {
+//            goforward(left_YAxis);
+//
+//        } else if (left_YAxis < -0.2) {
+//            gobackward(left_YAxis);
+//
+//        } else
+//            gostop(0);
 
         //intake controls
         if (gamepad1.right_bumper) {
@@ -166,8 +170,8 @@ public class Stabby_v1 extends OpMode {
 
         }
         if (gamepad1.dpad_right){
-            Lslideshift.setPosition(1);
-            Rslideshift.setPosition(1);
+            Lslideshift.setPosition(slideoutconstant);
+            Rslideshift.setPosition(slideoutconstant);
 
         }
     }
@@ -175,7 +179,22 @@ public class Stabby_v1 extends OpMode {
     @Override
     public void stop() {
     }
+    private void lift(int liftpos) {
+        double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
+        //.002
+        Llift.setTargetPosition(liftpos);
+        if (Llift.getCurrentPosition() >= liftpos) {
+            Llift.setPower(-1);
+            Rlift.setPower(-1);
+        }
+        Llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Llift.setPower(lift_power);
+        Rlift.setPower(lift_power);
+        telemetry.addData("lift L power", lift_power);
+        movespeed = 0.65;
+        turnspeed = 0.5;
 
+    }
     private void intakeforward() {
         intake.setPower(.7);
     }
