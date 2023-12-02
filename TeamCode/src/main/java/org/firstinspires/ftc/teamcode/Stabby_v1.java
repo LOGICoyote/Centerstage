@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.util.PIDRunner;
+import org.firstinspires.ftc.teamcode.PIDRunner;
 
 @TeleOp
 
@@ -80,8 +80,8 @@ public class Stabby_v1 extends OpMode {
         Llift = hardwareMap.get(DcMotor.class, "llift");
         Rlift = hardwareMap.get(DcMotor.class, "rlift");
 
-        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001);
-        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001);
+        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001,);
+        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001,);
         
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
