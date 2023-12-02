@@ -64,7 +64,7 @@ public class Stabby_v1 extends OpMode {
     private PIDRunner rSlidePID;
     private PIDRunner lSlidePID;
     private double precisemovespeed=0.5;
-    
+    private double desSlideHeight = 0.0;
 
     @Override
     public void init() {
@@ -179,13 +179,26 @@ public class Stabby_v1 extends OpMode {
         if (gamepad1.dpad_right){
             Lslideshift.setPosition(slideoutconstant);
             Rslideshift.setPosition(slideoutconstant);
-
         }
+
+        // lift controls
+        if (gamepad1.a) {
+            desSlideHeight = convertToCM(3);
+        }
+        if (gamepad1.b) {
+            desSlideHeight = convertToCM(6);
+        }
+        lift(desSlideHeight); // run this every cycle
     }
 
     @Override
     public void stop() {
     }
+
+    private void convertToCM(double inches) {
+        double cm = inches * 2.54;
+    }
+
     private void lift(int liftpos) {
 
         double rPosition = Rlift.getCurrentPosition();
@@ -196,6 +209,16 @@ public class Stabby_v1 extends OpMode {
         
         double rPower = rSlidePID.calculate(rHeightCM, liftpos, getRuntime());
         double lPower = lSlidePID.calculate(lHeightCM, liftpos, getRuntime());
+
+        double differentialHeight = Math.abs(rHeightCM - lHeightCM);
+        double averageHeight = (rHeightCM + lHeightCM) / 2;
+        if(differentialHeight > 0.3) {
+            if(rHeightCM > lHeightCM) {
+                rPower = rPower - 0.1;
+            } else {
+                lPower = lPower - 0.1;
+            }
+        }
 
         // double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
         //.002
