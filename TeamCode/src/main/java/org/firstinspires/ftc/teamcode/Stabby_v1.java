@@ -42,7 +42,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.concurrent.TimeUnit;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.PIDRunner;
+import org.firstinspires.ftc.teamcode.util.PIDRunner;
 
 @TeleOp
 
@@ -83,8 +83,8 @@ public class Stabby_v1 extends OpMode {
         Llift = hardwareMap.get(DcMotor.class, "llift");
         Rlift = hardwareMap.get(DcMotor.class, "rlift");
 
-        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, runtime.getRuntime());
-        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, runtime.getRuntime());
+        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, getRuntime());
+        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, getRuntime());
         
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -194,8 +194,8 @@ public class Stabby_v1 extends OpMode {
         double rHeightCM = (55.0 * rPosition * Math.PI) / 145.1;
         double lHeightCM = (55.0 * lPosition * Math.PI) / 145.1;
         
-        double rPower = rSlidePID.calculate(rHeightCM, liftpos, runtime.getRuntime());
-        double lPower = lSlidePID.calculate(lHeightCM, liftpos, runtime.getRuntime());
+        double rPower = rSlidePID.calculate(rHeightCM, liftpos, getRuntime());
+        double lPower = lSlidePID.calculate(lHeightCM, liftpos, getRuntime());
 
         // double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
         //.002
