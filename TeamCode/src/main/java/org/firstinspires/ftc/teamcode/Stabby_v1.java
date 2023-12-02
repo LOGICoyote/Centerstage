@@ -40,6 +40,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.util.PIDRunner;
 
 @TeleOp
 
@@ -58,13 +59,14 @@ public class Stabby_v1 extends OpMode {
     private DcMotor Llift;
     private DcMotor Rlift;
     private double slideoutconstant = 0.8;
-
+    private PIDRunner rSlidePID;
+    private PIDRunner lSlidePID;
     private double precisemovespeed=0.5;
 
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-
+        
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
@@ -78,7 +80,9 @@ public class Stabby_v1 extends OpMode {
         Llift = hardwareMap.get(DcMotor.class, "llift");
         Rlift = hardwareMap.get(DcMotor.class, "rlift");
 
-
+        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001);
+        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001);
+        
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
@@ -180,17 +184,32 @@ public class Stabby_v1 extends OpMode {
     public void stop() {
     }
     private void lift(int liftpos) {
-        double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
+
+        double rPosition = Rlift.getCurrentPosition();
+        double lPosition = Llift.getCurrentPosition();
+        
+        double rHeightCM = (55.0 * rPosition * Math.PI) / 145.1;
+        double lHeightCM = (55.0 * lPosition * Math.PI) / 145.1;
+        
+        double rPower = rSlidePID.calculate(rHeightCM, liftpos);
+        double lPower = lSlidePID.calculate(lHeightCM, liftpos);
+
+        // double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
         //.002
-        Llift.setTargetPosition(liftpos);
-        if (Llift.getCurrentPosition() >= liftpos) {
-            Llift.setPower(-1);
-            Rlift.setPower(-1);
-        }
-        Llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Llift.setPower(lift_power);
-        Rlift.setPower(lift_power);
-        telemetry.addData("lift L power", lift_power);
+        // Llift.setTargetPosition(liftpos);
+        // if (Llift.getCurrentPosition() >= liftpos) {
+        //     Llift.setPower(-1);
+        //     Rlift.setPower(-1);
+        // }
+        // Llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // uncomment when ready to test
+        // Llift.setPower(rPower);
+        // Rlift.setPower(lPower);
+        telemetry.addData("lift L pos", rHeightCM);
+        telemetry.addData("lift R pos", lHeightCM);
+
+        telemetry.addData("lift L power", lPower);
+        telemetry.addData("lift R power", rPower);
         movespeed = 0.65;
         turnspeed = 0.5;
 
