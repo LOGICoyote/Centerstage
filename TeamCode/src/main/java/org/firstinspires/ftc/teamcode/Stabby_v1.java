@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -60,6 +61,8 @@ public class Stabby_v1 extends OpMode {
     private Servo Lslideshift;
     private DcMotor Llift;
     private DcMotor Rlift;
+    private DcMotor Llifttest;
+
     private double slideoutconstant = 0.8;
     private PIDRunner rSlidePID;
     private PIDRunner lSlidePID;
@@ -80,11 +83,12 @@ public class Stabby_v1 extends OpMode {
         intake  = hardwareMap.get(DcMotor.class, "intake");
         Lslideshift=hardwareMap.get(Servo.class, "Lshift");
         Rslideshift=hardwareMap.get(Servo.class, "Rshift");
-        Llift = hardwareMap.get(DcMotor.class, "llift");
+       // Llift = hardwareMap.get(DcMotor.class, "llift");
+        Llifttest=hardwareMap.get(DcMotor.class, "xlift");
         Rlift = hardwareMap.get(DcMotor.class, "rlift");
 
-        rSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, getRuntime());
-        lSlidePID = new PIDRunner(0.0001, 0.0000001, 0.0000001, getRuntime());
+        rSlidePID = new PIDRunner(0.03, 0, 0, getRuntime());
+        lSlidePID = new PIDRunner(0.03, 0, 0, getRuntime());
         
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
@@ -92,6 +96,7 @@ public class Stabby_v1 extends OpMode {
         leftBack.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.REVERSE);
+        Rlift.setDirection(DcMotorSimple.Direction.REVERSE);
 
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -105,14 +110,12 @@ public class Stabby_v1 extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+        //Llift.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        Rlift.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Name me", "or I will revolt");
-        telemetry.update();
-        //telemetry.addData("liftpos", liftpos);
-        // telemetry.update();
         // Setup a variable for the joysticks and triggers
         double left_YAxis;
         double left_XAxis;
@@ -183,32 +186,37 @@ public class Stabby_v1 extends OpMode {
 
         // lift controls
         if (gamepad1.a) {
-            desSlideHeight = convertToCM(3);
+            desSlideHeight = convertToCM(3.0);
         }
         if (gamepad1.b) {
-            desSlideHeight = convertToCM(6);
+            desSlideHeight = convertToCM(6.0);
         }
-        lift(desSlideHeight); // run this every cycle
+       // lift(desSlideHeight); // run this every cycle
+        if (gamepad1.x){
+            Llifttest.setPower(.5);
+        }
+
     }
 
     @Override
     public void stop() {
     }
 
-    private void convertToCM(double inches) {
+    private double convertToCM(double inches) {
         double cm = inches * 2.54;
+        return cm;
     }
 
-    private void lift(int liftpos) {
+    private void lift(double liftpos) {
 
         double rPosition = Rlift.getCurrentPosition();
         double lPosition = Llift.getCurrentPosition();
         
-        double rHeightCM = (55.0 * rPosition * Math.PI) / 145.1;
-        double lHeightCM = (55.0 * lPosition * Math.PI) / 145.1;
+        double rHeightCM = (3.18 * rPosition * Math.PI) / 145.1;
+        double lHeightCM = (3.18 * lPosition * Math.PI) / 145.1;
         
-        double rPower = rSlidePID.calculate(rHeightCM, liftpos, getRuntime());
-        double lPower = lSlidePID.calculate(lHeightCM, liftpos, getRuntime());
+        double rPower = rSlidePID.calculate(liftpos,  rHeightCM, getRuntime());
+        double lPower = lSlidePID.calculate(liftpos, lHeightCM, getRuntime());
 
         double differentialHeight = Math.abs(rHeightCM - lHeightCM);
         double averageHeight = (rHeightCM + lHeightCM) / 2;
@@ -225,20 +233,23 @@ public class Stabby_v1 extends OpMode {
         // Llift.setTargetPosition(liftpos);
         // if (Llift.getCurrentPosition() >= liftpos) {
         //     Llift.setPower(-1);
+        //     Llift.setPower(-1);
         //     Rlift.setPower(-1);
         // }
         // Llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // uncomment when ready to test
-        // Llift.setPower(rPower);
-        // Rlift.setPower(lPower);
-        telemetry.addData("lift L pos", rHeightCM);
-        telemetry.addData("lift R pos", lHeightCM);
-
+        Llift.setPower(-0.5);
+        Rlift.setPower(-0.5);
+        telemetry.addData("lift r pos", rHeightCM);
+        telemetry.addData("lift l pos", lHeightCM);
+        telemetry.addData("despos", liftpos);
+        telemetry.addData("desheight1", desSlideHeight);
         telemetry.addData("lift L power", lPower);
         telemetry.addData("lift R power", rPower);
+        telemetry.addData("encoderL", Llift.getCurrentPosition());
+        telemetry.addData("encoderR", Rlift.getCurrentPosition());
         movespeed = 0.65;
         turnspeed = 0.5;
-
     }
     private void intakeforward() {
         intake.setPower(.7);
