@@ -14,15 +14,11 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
                     // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                     .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                     .followTrajectorySequence(drive ->
-                            drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
-                                    .forward(30)
-                                    .turn(Math.toRadians(90))
-                                    .forward(30)
-                                    .turn(Math.toRadians(90))
-                                    .forward(30)
-                                    .turn(Math.toRadians(90))
-                                    .forward(30)
-                                    .turn(Math.toRadians(90))
+                            drive.trajectorySequenceBuilder(new Pose2d(-35, 0, 0))
+                                    .forward(25)
+                                    .turn(Math.toRadians(-90))
+                                    .forward(5)
+                                    .strafeRight(2)
                                     .build()
                     );
 

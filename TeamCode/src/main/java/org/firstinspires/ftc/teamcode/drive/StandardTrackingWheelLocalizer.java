@@ -31,12 +31,12 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
     public static double WHEEL_RADIUS =.69 ;//1.8898 //.69// in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 11; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = 7.5; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 14.373190041503896; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = 0; // in; offset of the lateral wheel
 
     private Encoder leftEncoder, rightEncoder, frontEncoder;
-    public static double X_MULTIPLIER = 1.00806452; // Multiplier in the X direction
-    public static double Y_MULTIPLIER = 1.011822625; // Multiplier in the Y direction
+    public static double X_MULTIPLIER = 0.996;//1.00806452; // Multiplier in the X direction
+    public static double Y_MULTIPLIER = 1.00944635865;//1.011822625; // Multiplier in the Y direction
     public StandardTrackingWheelLocalizer(HardwareMap hardwareMap) {
         super(Arrays.asList(
                 new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
@@ -44,14 +44,14 @@ public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer 
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "motor00"));
-        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "motor 0"));
-        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "motor01"));
+        leftEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "intake"));
+        rightEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "lf"));
+        frontEncoder = new Encoder(hardwareMap.get(DcMotorEx.class, "lb"));
 
         // TODO: reverse any encoders using Encoder.setDirection(Encoder.Direction.REVERSE)
-        //leftEncoder.setDirection(Encoder.Direction.REVERSE);
-        //rightEncoder.setDirection(Encoder.Direction.REVERSE);
-        frontEncoder.setDirection(Encoder.Direction.REVERSE);
+        leftEncoder.setDirection(Encoder.Direction.REVERSE);
+        rightEncoder.setDirection(Encoder.Direction.REVERSE);
+        //frontEncoder.setDirection(Encoder.Direction.REVERSE);
 
     }
 

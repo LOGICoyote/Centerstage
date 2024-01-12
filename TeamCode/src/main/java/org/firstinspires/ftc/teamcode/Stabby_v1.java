@@ -1,31 +1,3 @@
-/* Copyright (c) 2017 FIRST. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided that
- * the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this list
- * of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice, this
- * list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution.
- *
- * Neither the name of FIRST nor the names of its contributors may be used to endorse or
- * promote products derived from this software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
- * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 
 
 package org.firstinspires.ftc.teamcode;
@@ -54,23 +26,29 @@ public class Stabby_v1 extends OpMode {
     private DcMotor rightFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightBack = null;
-    private double movespeed = 21;
-    private double turnspeed = .75;
+
     private DcMotor intake;
     private Servo Rslideshift;
     private Servo Lslideshift;
     private DcMotor Llift;
     private DcMotor Rlift;
+    private DcMotor climb;
+
     private Servo lclawturn;
     private Servo rclawturn;
     private Servo rclaw;
     private Servo lclaw;
+    private Servo door;
 
-    //private DcMotor Llifttest;
 
-    private double slideoutconstant = 0.3;
     private PIDRunner rSlidePID;
     private PIDRunner lSlidePID;
+    private PIDRunner climbPID;
+
+    private int  climbpos = 0;
+    private double slideoutconstant = 0.3;
+    private double movespeed = 21;
+    private double turnspeed = .75;
     private double precisemovespeed=0.5;
     private double desSlideHeight = 0.0;
     private boolean ypressed = false;
@@ -81,9 +59,6 @@ public class Stabby_v1 extends OpMode {
     private boolean twodrpressed = false;
     private boolean lclawclosed = true;
     private boolean rclawclosed = true;
-
-
-
 
     @Override
     public void init() {
@@ -97,18 +72,20 @@ public class Stabby_v1 extends OpMode {
         rightBack = hardwareMap.get(DcMotor.class, "rb");
         rightFront= hardwareMap.get(DcMotor.class, "rf");
         intake  = hardwareMap.get(DcMotor.class, "intake");
-        Lslideshift=hardwareMap.get(Servo.class, "Lshift");
-        Rslideshift=hardwareMap.get(Servo.class, "Rshift");
+        climb  = hardwareMap.get(DcMotor.class, "climb");
         Llift = hardwareMap.get(DcMotor.class, "llift");
         Rlift = hardwareMap.get(DcMotor.class, "rlift");
         lclawturn=hardwareMap.get(Servo.class, "lclawturn");
         rclawturn=hardwareMap.get(Servo.class, "rclawturn");
         lclaw=hardwareMap.get(Servo.class, "lclaw");
         rclaw=hardwareMap.get(Servo.class, "rclaw");
+        door=hardwareMap.get(Servo.class, "door");
 
-        rSlidePID = new PIDRunner(0.1, 0, 0, getRuntime());
-        lSlidePID = new PIDRunner(0.1, 0, 0, getRuntime());
-        
+//.1 on both
+        rSlidePID = new PIDRunner(0.4, 0, 0, getRuntime());
+        lSlidePID = new PIDRunner(0.4, 0, 0, getRuntime());
+        climbPID = new PIDRunner(0.1, 0, 0, getRuntime());
+
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
@@ -133,6 +110,8 @@ public class Stabby_v1 extends OpMode {
         runtime.reset();
         Llift.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         Rlift.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        climb.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        climb.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         Llift.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         Rlift.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
@@ -197,26 +176,27 @@ public class Stabby_v1 extends OpMode {
         if (gamepad1.dpad_up){
             intakeoff();
         }
-        if (gamepad1.dpad_left){
-            Lslideshift.setPosition(0);
-            Rslideshift.setPosition(1);
-        }
-        if (gamepad1.dpad_right){
-            Lslideshift.setPosition(.15);
-            Rslideshift.setPosition(.85);
-            Lslideshift.setPosition(slideoutconstant);
-            Rslideshift.setPosition(1-slideoutconstant);
-        }
+//        if (gamepad1.dpad_left){
+//            Lslideshift.setPosition(0);
+//            Rslideshift.setPosition(1);
+//        }
+//        if (gamepad1.dpad_right){
+//            Lslideshift.setPosition(.15);
+//            Rslideshift.setPosition(.85);
+//            Lslideshift.setPosition(slideoutconstant);
+//            Rslideshift.setPosition(1-slideoutconstant);
+//        }
         if (gamepad1.dpad_down){
             desSlideHeight = convertToCM(0);
         }
         // lift controls
         if (gamepad1.a) {
-            desSlideHeight = convertToCM(10.0);
+            desSlideHeight = convertToCM(15.0);
         }
         if (gamepad1.b) {
             desSlideHeight = convertToCM(25);
         }
+
 //        if (gamepad1.y) {
 //            //closed
 //            lclaw.setPosition(0.25);
@@ -279,12 +259,14 @@ public class Stabby_v1 extends OpMode {
             twodrpressed=true;
         } else
             twodrpressed = false;
+
 //        if (gamepad2.left_bumper) {
 //            lclaw.setPosition(.4);
 ////        }
 //        if (gamepad2.right_bumper) {
 //            rclaw.setPosition(.6);
 //        }
+
 
         if (gamepad2.a) {
             lclawturn.setPosition(.25);
@@ -300,11 +282,17 @@ public class Stabby_v1 extends OpMode {
             rclawturn.setPosition(0.1);
         }
         if (gamepad2.dpad_right){
-            Lslideshift.setPosition(.15);
-            Rslideshift.setPosition(.85);
-            Lslideshift.setPosition(slideoutconstant);
-            Rslideshift.setPosition(1-slideoutconstant);
+            climbpos = 200;
         }
+        if (gamepad2.dpad_right){
+            climbpos = 0;
+        }
+//        if (gamepad2.dpad_right){
+//            Lslideshift.setPosition(.15);
+//            Rslideshift.setPosition(.85);
+//            Lslideshift.setPosition(slideoutconstant);
+//            Rslideshift.setPosition(1-slideoutconstant);
+//        }
 
         if (gamepad2.dpad_up) {
             if (!dpaduppressed) {
@@ -326,11 +314,16 @@ public class Stabby_v1 extends OpMode {
 //        if (gamepad2.dpad_down){
 //            desSlideHeight -= convertToCM(1.0);
 //        }
-        if (gamepad2.dpad_left){
-            Lslideshift.setPosition(0);
-            Rslideshift.setPosition(1);
+//        if (gamepad2.dpad_left){
+//            Lslideshift.setPosition(0);
+//            Rslideshift.setPosition(1);
+//        }
+        if (gamepad2.x){
+            intakereverse();
         }
-        lift(desSlideHeight); // run this every cycle
+        lift(desSlideHeight);
+        // run this every cycle
+        climb(climbpos);
     }
 
     @Override
@@ -341,7 +334,13 @@ public class Stabby_v1 extends OpMode {
         double cm = inches * 2.54;
         return cm;
     }
-
+    private void climb(double climbpos){
+       double climbat = climb.getCurrentPosition();
+       double climbpower= climbPID.calculate(climbpos,climbat,getRuntime());
+       climb.setPower(climbpower);
+        telemetry.addData("climb pos", climbpos);
+        telemetry.addData("climb encoder", climb.getCurrentPosition());
+    }
     private void lift(double liftpos) {
 
         double rPosition = -Rlift.getCurrentPosition();
@@ -362,17 +361,6 @@ public class Stabby_v1 extends OpMode {
                 lPower = lPower - 0.1;
             }
         }
-
-        // double lift_power = (liftpos - Llift.getCurrentPosition()) * 0.002;
-        //.002
-        // Llift.setTargetPosition(liftpos);
-        // if (Llift.getCurrentPosition() >= liftpos) {
-        //     Llift.setPower(-1);
-        //     Llift.setPower(-1);
-        //     Rlift.setPower(-1);
-        // }
-        // Llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        // uncomment when ready to test
         Llift.setPower(lPower);
         Rlift.setPower(-rPower);
         telemetry.addData("lift r pos", rHeightCM);
@@ -387,11 +375,10 @@ public class Stabby_v1 extends OpMode {
         turnspeed = 0.5;
     }
     private void intakeforward() {
-        intake.setPower(.9);
+        intake.setPower(1);
     }
     private void intakeoff() {
         intake.setPower(0);
-
     }
     private void intakereverse() {
         intake.setPower(-.7);

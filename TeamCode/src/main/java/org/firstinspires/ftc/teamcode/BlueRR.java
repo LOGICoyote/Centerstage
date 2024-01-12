@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -24,7 +23,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 @Autonomous
 
-public class BlueRRVis14 extends LinearOpMode {
+public class BlueRR extends LinearOpMode {
 
     OpenCvCamera WebCam;
     //Thing myThing;
@@ -94,16 +93,27 @@ public class BlueRRVis14 extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         TrajectorySequence traj1 = drive.trajectorySequenceBuilder(startPose)
-              .strafeRight(12)
-                .forward(13)
+              .strafeRight(8)
+                .forward(25)
                 .build();
         TrajectorySequence traj1a = drive.trajectorySequenceBuilder(startPose)
-                .forward(23)
+                .forward(27)
+                .strafeLeft(5)
                 .build();
         TrajectorySequence traj1b = drive.trajectorySequenceBuilder(startPose)
-                .forward(27)
+                .forward(25)
                 .turn(Math.toRadians(90))
+                .forward(5)
+                .strafeRight(2)
                 .build();
+
+        TrajectorySequence trajfix2 = drive.trajectorySequenceBuilder(startPose)
+                .strafeRight(5)
+                .build();
+        TrajectorySequence trajfix = drive.trajectorySequenceBuilder(startPose)
+                .forward(10)
+                .build();
+
         TrajectorySequence traj2b = drive.trajectorySequenceBuilder(traj1b.end())
                 .back(5)
                 .strafeLeft(27)
@@ -130,17 +140,21 @@ public class BlueRRVis14 extends LinearOpMode {
         telemetry.addData("position", myThing.position);
         telemetry.update();
            if (myThing.position == Thing.CapPosition.C){
-               drive.followTrajectorySequence(traj1b);
+               drive.followTrajectorySequence(traj1);
                sleep(1000);
-               lift(200);
+               lift(100);
                sleep(500);
                clawdump();
-               sleep(200);
+//               sleep(1000);
+//               lift(50);
+               sleep(1000);
                rclaw.setPosition(.65);
                sleep(2000);
                rclaw.setPosition(0.75);
                sleep(1500);
-               drive.followTrajectorySequence(traj2b);
+               drive.followTrajectorySequence(trajfix2);
+               drive.followTrajectorySequence(trajfix);
+               drive.followTrajectorySequence(traj2);
                clawready();
                sleep(200);
                lift(0);
@@ -148,14 +162,15 @@ public class BlueRRVis14 extends LinearOpMode {
              else if (myThing.position == Thing.CapPosition.B){
                drive.followTrajectorySequence(traj1a);
                sleep(1000);
-               lift(200);
+               lift(100);
                sleep(500);
                clawdump();
-               sleep(200);
+               sleep(1000);
                rclaw.setPosition(.65);
                sleep(2000);
                rclaw.setPosition(0.75);
                sleep(1500);
+               drive.followTrajectorySequence(trajfix);
                drive.followTrajectorySequence(traj2);
                clawready();
                sleep(200);
@@ -163,17 +178,17 @@ public class BlueRRVis14 extends LinearOpMode {
                sleep(999999);
              }
             else if (myThing.position == Thing.CapPosition.A){
-               drive.followTrajectorySequence(traj1);
+               drive.followTrajectorySequence(traj1b);
                sleep(1000);
-               lift(200);
+               lift(100);
                sleep(500);
                clawdump();
-               sleep(200);
+               sleep(1000);
                rclaw.setPosition(.65);
                sleep(2000);
                rclaw.setPosition(0.75);
                sleep(1500);
-               drive.followTrajectorySequence(traj2);
+               drive.followTrajectorySequence(traj2b);
                clawready();
                sleep(200);
                lift(0);
@@ -285,21 +300,22 @@ public class BlueRRVis14 extends LinearOpMode {
             Imgproc.rectangle(input, region2_pointA, region2_pointB, BLUE, 2);
             Imgproc.rectangle(input, region3_pointA, region3_pointB, BLUE, 2);
 
-            position = CapPosition.A;
+            position = BlueRR.Thing.CapPosition.A;
             if ((avg2<=avg3)&&(avg2<=122)){
-                position = CapPosition.B;
+                position = BlueRR.Thing.CapPosition.B;
             }
             else if ((avg3<avg2)&&(avg3<122)){
-                position = CapPosition.C;
+                position = BlueRR.Thing.CapPosition.C;
             }
             else {
-            position = CapPosition.A;
+                position = BlueRR.Thing.CapPosition.A;
             }
             Imgproc.rectangle(input,region1_pointA,region1_pointB, GREEN, 1);
             return input;
         }
+
         public int getAnalysis(){
-            return avg3;
+            return avg1;
         }
     }
 

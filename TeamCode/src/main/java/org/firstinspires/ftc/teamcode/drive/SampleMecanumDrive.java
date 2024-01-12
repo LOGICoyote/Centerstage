@@ -56,7 +56,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(10, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(11, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.73846154;//1.51898734//1.53846154
+    public static double LATERAL_MULTIPLIER = 1.010526315791;//1.73846154;//1.51898734//1.53846154
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -122,10 +122,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 //        rightRear = hardwareMap.get(DcMotorEx.class, "motor03");
 //        rightFront = hardwareMap.get(DcMotorEx.class, "motor01");
 
-        rightRear = hardwareMap.get(DcMotorEx.class, "motor00");
-        rightFront = hardwareMap.get(DcMotorEx.class, "motor02");
-        leftFront = hardwareMap.get(DcMotorEx.class, "motor03");
-        leftRear = hardwareMap.get(DcMotorEx.class, "motor01");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rb");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
+        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
+        leftRear = hardwareMap.get(DcMotorEx.class, "lb");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 
@@ -154,6 +154,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
         setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap));
+
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
 
