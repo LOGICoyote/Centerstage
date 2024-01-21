@@ -35,6 +35,11 @@ public class PIDRunner {
         return output;
     }
 
+    public double calculate(double error){
+        return calculate(error,0,0.02);
+
+    }
+
     public void reset() {
         integralError = 0.0;
     }

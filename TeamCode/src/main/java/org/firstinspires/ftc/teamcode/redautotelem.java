@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,7 +9,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.util.LoggingUtil;
 import org.firstinspires.ftc.teamcode.util.PIDRunner;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -25,7 +23,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 @Autonomous
 
-public class RedRR extends LinearOpMode {
+public class redautotelem extends LinearOpMode {
 
     OpenCvCamera WebCam;
     //Thing myThing;
@@ -49,6 +47,7 @@ public class RedRR extends LinearOpMode {
     private Servo rclawturn;
     private Servo rclaw;
     private Servo lclaw;
+    private Servo door;
     private double slideoutconstant = 0.3;
     Thing myThing;
 
@@ -73,6 +72,8 @@ public class RedRR extends LinearOpMode {
         rclawturn=hardwareMap.get(Servo.class, "rclawturn");
         lclaw=hardwareMap.get(Servo.class, "lclaw");
         rclaw=hardwareMap.get(Servo.class, "rclaw");
+        door=hardwareMap.get(Servo.class, "door");
+
         rSlidePID = new PIDRunner(0.1, 0, 0, getRuntime());
         lSlidePID = new PIDRunner(0.1, 0, 0, getRuntime());
 
@@ -97,51 +98,23 @@ public class RedRR extends LinearOpMode {
 
         Pose2d startPose = new Pose2d(-35, -60, Math.toRadians(-90));
         drive.setPoseEstimate(startPose);
-
+        TrajectorySequence traja1= drive.trajectorySequenceBuilder(startPose)
+                .forward(25)
+                .strafeLeft(3)
+                .build();
         TrajectorySequence traj1 = drive.trajectorySequenceBuilder(startPose)
-              .strafeLeft(8)
-                .forward(25)
-                .build();
-        TrajectorySequence traj1a = drive.trajectorySequenceBuilder(startPose)
-                .forward(27)
-                .strafeRight(5)
-                .build();
-        TrajectorySequence traj1b = drive.trajectorySequenceBuilder(startPose)
-                .forward(25)
-                .turn(Math.toRadians(-90))
-                .forward(5)
-                .strafeLeft(2)
-                .build();
-        TrajectorySequence traj21b = drive.trajectorySequenceBuilder(traj1b.end())
-                .forward(20)
-                .build();
-        TrajectorySequence traj31b = drive.trajectorySequenceBuilder(traj1b.end())
-                .back(3)
-                .strafeRight(5)
-                .build();
-        TrajectorySequence trajfix = drive.trajectorySequenceBuilder(startPose)
-                .forward(5)
-                .build();
-
-        TrajectorySequence traj2b = drive.trajectorySequenceBuilder(traj1b.end())
-                .back(5)
-                .strafeRight(27)
+              .forward(36)
                 .build();
         TrajectorySequence traj2 = drive.trajectorySequenceBuilder(traj1.end())
-                .back(10)
+                .forward(10)
                 .build();
         TrajectorySequence traj3 = drive.trajectorySequenceBuilder(traj2.end())
-                .back(3)
-                .turn(Math.toRadians(-90))
-                .strafeRight(2)
-                .strafeLeft(2)
-                .forward(80)
-                .strafeLeft(25)
-                .forward(12)
+                .forward(5)
                 .build();
-        TrajectorySequence traj4 = drive.trajectorySequenceBuilder(traj3.end())
-                .strafeLeft(23)
-                .forward(13)
+        TrajectorySequence trajc1= drive.trajectorySequenceBuilder(startPose)
+                .forward(25)
+                .turn(Math.toRadians(-90))
+                .forward(10)
                 .build();
         waitForStart();
         liftThread.start();
@@ -150,73 +123,32 @@ public class RedRR extends LinearOpMode {
         telemetry.addData("Analysis", myThing.getAnalysis());
         telemetry.addData("position", myThing.position);
         telemetry.update();
-           if (myThing.position == Thing.CapPosition.C){
-              intakeonslow();
-               drive.followTrajectorySequence(traj1b);
-               intakeoff();
-               sleep(1000);
-               drive.followTrajectorySequence(traj21b);
-               lift(200);
-               sleep(500);
-               clawdump();
-               sleep(200);
-               drive.followTrajectorySequence(traj31b);
-//               clawdump();
-//               sleep(1000);
-//               rclaw.setPosition(.65);
-//               sleep(2000);
-//               rclaw.setPosition(0.75);
-//               sleep(1500);
-//               drive.followTrajectorySequence(traj2b);
-//               clawready();
-//               sleep(200);
-//               lift(0);
-                sleep(999999);            }
-             else if (myThing.position == Thing.CapPosition.B){
-                 intakeonslow();
-                 drive.followTrajectorySequence(traj1a);
-                 intakeoff();
-//               sleep(1000);
-//               lift(100);
-//               sleep(500);
-//               clawdump();
-//               sleep(1000);
-//               rclaw.setPosition(.65);
-//               sleep(2000);
-//               rclaw.setPosition(0.75);
-//               sleep(1500);
-//               drive.followTrajectorySequence(trajfix);
+        sleep(99999999);
+//           if (myThing.position == Thing.CapPosition.C){
+//               //right
+//               drive.followTrajectorySequence(trajc1);
+//               door.setPosition(1);
 //               drive.followTrajectorySequence(traj2);
-//               clawready();
-//               sleep(200);
-//               lift(0);
-               sleep(999999);
-             }
-            else if (myThing.position == Thing.CapPosition.A){
-                intakeonslow();
-               drive.followTrajectorySequence(traj1);
-               intakeoff();
-//               sleep(1000);
-//               lift(100);
+//                sleep(999999);            }
+//             else if (myThing.position == Thing.CapPosition.B){
+//                 //center
+//                drive.followTrajectorySequence(traj1);
+//               door.setPosition(1);
 //               sleep(500);
-//               clawdump();
-////               sleep(1000);
-////               lift(50);
-//               sleep(1000);
-//               rclaw.setPosition(.65);
-//               sleep(2000);
-//               rclaw.setPosition(0.75);
-//               sleep(1500);
-//               drive.followTrajectorySequence(trajfix);
 //               drive.followTrajectorySequence(traj2);
-//               clawready();
-//               sleep(200);
-//               lift(0);
-////               sleep(500);
-////               drive.followTrajectorySequence(traj3);
-////               lift(500);
-               sleep(999999);
-           }
+//               sleep(1000);
+//               drive.followTrajectorySequence(traj3);
+//               sleep(999999);
+//             }
+//            else if (myThing.position == Thing.CapPosition.A){
+//                //left
+//               drive.followTrajectorySequence(traja1);
+//               door.setPosition(1);
+//               sleep(500);
+//               drive.followTrajectorySequence(traj2);
+//
+//               sleep(999999);
+//           }
     }
 
     private void lift(double liftpos) {
@@ -228,13 +160,7 @@ public class RedRR extends LinearOpMode {
         double cm = inches * 2.54;
         return cm;
     }
-//    private void shiftout() {
-//        Lslideshift.setPosition(.15);
-//        Rslideshift.setPosition(.85);
-//        sleep(100);
-//        Lslideshift.setPosition(slideoutconstant);
-//        Rslideshift.setPosition(1-slideoutconstant);
-//    }
+
     private void clawdump() {
         lclawturn.setPosition(0.3);
         rclawturn.setPosition(0.3);
